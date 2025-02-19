@@ -30,14 +30,14 @@ cd fiap-blog-mobile
 code .
 
 # Instalar dependências
-npm install
+npm i -g expo-cli
 ```
 
 ## 🚀 Executar projeto localmente
 
 ```bash
 # Levantar server local
-npm run dev
+npx expo start
 ```
 
 Com o projeto rodando na porta 3000 [http://localhost:3000/], é possível utilizá-lo de duas formas:
