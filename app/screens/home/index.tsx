@@ -1,12 +1,26 @@
-import { useEffect } from "react";
-import { View, Text, StyleSheet } from "react-native";
+import { useEffect, useState } from "react";
+import { View, Text, StyleSheet, FlatList } from "react-native";
 import { useAuth0 } from "react-native-auth0";
 import LoginButton from "@/components/LoginButton";
 import LogoutButton from "@/components/LogoutButton";
 import LoadingIndicator from "@/components/LoadingIndicator";
+import PostCard from "@/components/PostCard";
+
+interface Post {
+  _id: string;
+  title: string;
+  author: string;
+  description: string;
+  createDate: string;
+  updateDate: string;
+}
 
 export default function Home() {
   const { user, isLoading } = useAuth0();
+
+  const [posts, setPosts] = useState<Post[]>([]);
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     console.log("User state changed", user);
@@ -16,23 +30,76 @@ export default function Home() {
     console.log("Loading state changed", isLoading);
   }, [isLoading]);
 
-  if (isLoading) {
+  useEffect(() => {
+    async function fetchPosts() {
+      try {
+        const response = await fetch("https://fiap-blog-backend-latest.onrender.com/posts");
+
+        if (!response.ok) {
+          throw new Error(`Erro HTTP! Status: ${response.status}`);
+        }
+
+        const data = await response.json();
+
+        setPosts(data);
+      } catch (error) {
+        if (error instanceof Error) {
+          setError(error.message);
+        } else {
+          setError("Ocorreu um erro desconhecido!");
+        }
+        console.error("Erro ao buscar posts:", error);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchPosts();
+  }, []);
+
+  if (isLoading || loading) {
     return <LoadingIndicator />;
   }
 
+  if (error) {
+    // ToDo
+  }
+
+  const onEdit = (id: string) => {
+    // ToDo
+  };
+
+  const onDelete = (id: string) => {
+    // ToDo
+  };
+
   return (
     <View style={styles.container}>
-      <>
-        <View style={styles.loggedInContainer}>
-          <Text style={styles.title}>Blog Educacional</Text>
-          <View style={styles.authButtonContainer}>
-            {user ? <LogoutButton /> : <LoginButton />}
-          </View>
+      <View style={styles.header}>
+        <Text style={styles.title}>Blog Educacional</Text>
+        <View style={styles.authButtonContainer}>
+          {user ? <LogoutButton /> : <LoginButton />}
         </View>
-        {user ? (
-          <Text style={styles.userText}>Logado como {user.nickname}</Text>
-        ) : null}
-      </>
+      </View>
+      {user ? (
+        <Text style={styles.userText}>Logado como {user.nickname}</Text>
+      ) : null}
+
+      <FlatList
+        data={posts}
+        renderItem={({ item }) => (
+          <PostCard
+            _id={item._id}
+            author={item.author}
+            title={item.title}
+            description={item.description}
+            onEdit={onEdit}
+            onDelete={onDelete}
+          />
+        )}
+        keyExtractor={(item) => item._id}
+        contentContainerStyle={styles.list}
+      />
     </View>
   );
 }
@@ -43,8 +110,9 @@ const styles = StyleSheet.create({
     justifyContent: "flex-start",
     alignItems: "center",
     paddingTop: 20,
+    width: "100%",
   },
-  loggedInContainer: {
+  header: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
@@ -65,5 +133,10 @@ const styles = StyleSheet.create({
     position: "absolute",
     top: 10,
     right: 10,
+  },
+  list: {
+    paddingTop: 20,
+    paddingBottom: 20,
+    width: "100%",
   },
 });
