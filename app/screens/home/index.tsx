@@ -1,18 +1,12 @@
 import { useEffect } from "react";
-import {
-  View,
-  Text,
-  Button,
-  ActivityIndicator,
-  StyleSheet,
-} from "react-native";
+import { View, Text, StyleSheet } from "react-native";
 import { useAuth0 } from "react-native-auth0";
 import LoginButton from "@/components/LoginButton";
 import LogoutButton from "@/components/LogoutButton";
 import LoadingIndicator from "@/components/LoadingIndicator";
 
 export default function Home() {
-  const { user, isLoading, authorize, clearSession } = useAuth0();
+  const { user, isLoading } = useAuth0();
 
   useEffect(() => {
     console.log("User state changed", user);
@@ -28,21 +22,17 @@ export default function Home() {
 
   return (
     <View style={styles.container}>
-        <>
-          <View style={styles.loggedInContainer}>
-            <Text style={styles.title}>Blog Educacional</Text>
-            <View style={styles.authButtonContainer}>
-                {user ? (
-                    <LogoutButton />
-                ) : (
-                    <LoginButton />
-                )}
-            </View>
+      <>
+        <View style={styles.loggedInContainer}>
+          <Text style={styles.title}>Blog Educacional</Text>
+          <View style={styles.authButtonContainer}>
+            {user ? <LogoutButton /> : <LoginButton />}
           </View>
-          {user ? (
-              <Text style={styles.userText}>Logado como {user.nickname}</Text>
-          ) : null}
-        </>
+        </View>
+        {user ? (
+          <Text style={styles.userText}>Logado como {user.nickname}</Text>
+        ) : null}
+      </>
     </View>
   );
 }
