@@ -1,6 +1,11 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { View, Text, StyleSheet, FlatList } from "react-native";
 import { useAuth0 } from "react-native-auth0";
+import {
+  useNavigation,
+  NavigationProp,
+  useFocusEffect,
+} from "@react-navigation/native";
 import LoginButton from "@/components/LoginButton";
 import LogoutButton from "@/components/LogoutButton";
 import LoadingIndicator from "@/components/LoadingIndicator";
@@ -15,11 +20,16 @@ interface Post {
   updateDate: string;
 }
 
+type RootStackParamList = {
+  Home: undefined;
+  EditScreen: { postId: string };
+};
+
 export default function Home() {
   const { user, isLoading } = useAuth0();
+  const navigation = useNavigation<NavigationProp<RootStackParamList>>();
 
   const [posts, setPosts] = useState<Post[]>([]);
-  const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -31,47 +41,46 @@ export default function Home() {
   }, [isLoading]);
 
   useEffect(() => {
-    async function fetchPosts() {
-      try {
-        const response = await fetch("https://fiap-blog-backend-latest.onrender.com/posts");
-
-        if (!response.ok) {
-          throw new Error(`Erro HTTP! Status: ${response.status}`);
-        }
-
-        const data = await response.json();
-
-        setPosts(data);
-      } catch (error) {
-        if (error instanceof Error) {
-          setError(error.message);
-        } else {
-          setError("Ocorreu um erro desconhecido!");
-        }
-        console.error("Erro ao buscar posts:", error);
-      } finally {
-        setLoading(false);
-      }
-    }
-
     fetchPosts();
   }, []);
 
-  if (isLoading || loading) {
-    return <LoadingIndicator />;
-  }
+  useFocusEffect(
+    useCallback(() => {
+      fetchPosts();
+    }, [])
+  );
 
-  if (error) {
-    // ToDo
-  }
+  const fetchPosts = async () => {
+    try {
+      const response = await fetch(
+        "https://fiap-blog-backend-latest.onrender.com/posts"
+      );
+
+      if (!response.ok) {
+        throw new Error(`Erro HTTP! Status: ${response.status}`);
+      }
+
+      const data = await response.json();
+
+      setPosts(data);
+    } catch (error) {
+      console.error("Erro ao buscar posts:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const onEdit = (id: string) => {
-    // ToDo
+    navigation.navigate("EditScreen", { postId: id });
   };
 
   const onDelete = (id: string) => {
     // ToDo
   };
+
+  if (isLoading || loading) {
+    return <LoadingIndicator />;
+  }
 
   return (
     <View style={styles.container}>
@@ -127,6 +136,7 @@ const styles = StyleSheet.create({
   },
   userText: {
     paddingTop: 10,
+    paddingBottom: 10,
     marginRight: 10,
   },
   authButtonContainer: {
