@@ -1,5 +1,12 @@
 import { useEffect, useState, useCallback } from "react";
-import { View, Text, StyleSheet, FlatList } from "react-native";
+import {
+  View,
+  Text,
+  StyleSheet,
+  FlatList,
+  TextInput,
+  TouchableOpacity,
+} from "react-native";
 import { useAuth0 } from "react-native-auth0";
 import {
   useNavigation,
@@ -31,6 +38,7 @@ export default function Home() {
 
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
     console.log("User state changed", user);
@@ -78,6 +86,14 @@ export default function Home() {
     // ToDo
   };
 
+  const handleSearch = () => {
+    // ToDo
+  }
+
+  const handleCreatePost = () => {
+    // ToDo
+  }
+
   if (isLoading || loading) {
     return <LoadingIndicator />;
   }
@@ -93,6 +109,21 @@ export default function Home() {
       {user ? (
         <Text style={styles.userText}>Logado como {user.nickname}</Text>
       ) : null}
+
+<View style={styles.searchContainer}>
+        <TextInput
+          style={styles.searchInput}
+          placeholder="Buscar posts..."
+          value={searchQuery}
+          onChangeText={handleSearch}
+        />
+        <TouchableOpacity
+          style={styles.createButton}
+          onPress={handleCreatePost}
+        >
+          <Text style={styles.createButtonText}>Create Post</Text>
+        </TouchableOpacity>
+      </View>
 
       <FlatList
         data={posts}
@@ -143,6 +174,33 @@ const styles = StyleSheet.create({
     position: "absolute",
     top: 10,
     right: 10,
+  },
+  searchContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    width: "100%",
+  },
+  searchInput: {
+    flex: 1,
+    borderWidth: 1,
+    borderColor: "#ccc",
+    borderRadius: 5,
+    padding: 10,
+    fontSize: 16,
+    backgroundColor: "#f9f9f9",
+  },
+  createButton: {
+    marginLeft: 10,
+    backgroundColor: "#28a745",
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 5,
+  },
+  createButtonText: {
+    color: "#fff",
+    fontWeight: "bold",
   },
   list: {
     paddingTop: 20,
