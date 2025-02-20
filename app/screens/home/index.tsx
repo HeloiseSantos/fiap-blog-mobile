@@ -7,6 +7,7 @@ import {
   TextInput,
   TouchableOpacity,
   Alert,
+  Button,
 } from "react-native";
 import { useAuth0 } from "react-native-auth0";
 import {
@@ -32,6 +33,7 @@ type RootStackParamList = {
   Home: undefined;
   EditScreen: { postId: string };
   CreatePostScreen: undefined;
+  TeacherUsersScreen: undefined;
 };
 
 export default function Home() {
@@ -155,6 +157,10 @@ export default function Home() {
     navigation.navigate("CreatePostScreen");
   };
 
+  const handleSettings = () => {
+    navigation.navigate("TeacherUsersScreen");
+  };
+
   if (isLoading || loading) {
     return <LoadingIndicator />;
   }
@@ -164,6 +170,9 @@ export default function Home() {
       <View style={styles.header}>
         <Text style={styles.title}>Blog Educacional</Text>
         <View style={styles.authButtonContainer}>
+          <TouchableOpacity style={styles.settingsButton} onPress={handleSettings}>
+            <Text style={styles.buttonText}>Settings</Text>
+          </TouchableOpacity>
           {user ? <LogoutButton /> : <LoginButton />}
         </View>
       </View>
@@ -232,9 +241,23 @@ const styles = StyleSheet.create({
     marginRight: 10,
   },
   authButtonContainer: {
+    flexDirection: "row",
     position: "absolute",
     top: 10,
     right: 10,
+  },
+  settingsButton: {
+    width: 70,
+    height: 40,
+    marginRight: 10,
+    backgroundColor: "#6c757d",
+    justifyContent: "center",
+    alignItems: "center",
+    borderRadius: 5,
+  },
+  buttonText: {
+    color: "#fff",
+    fontWeight: "bold",
   },
   searchContainer: {
     flexDirection: "row",
