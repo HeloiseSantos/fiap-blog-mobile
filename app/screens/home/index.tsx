@@ -30,6 +30,7 @@ interface Post {
 type RootStackParamList = {
   Home: undefined;
   EditScreen: { postId: string };
+  CreatePostScreen: undefined;
 };
 
 export default function Home() {
@@ -88,11 +89,11 @@ export default function Home() {
 
   const handleSearch = () => {
     // ToDo
-  }
+  };
 
   const handleCreatePost = () => {
-    // ToDo
-  }
+    navigation.navigate("CreatePostScreen");
+  };
 
   if (isLoading || loading) {
     return <LoadingIndicator />;
@@ -110,7 +111,7 @@ export default function Home() {
         <Text style={styles.userText}>Logado como {user.nickname}</Text>
       ) : null}
 
-<View style={styles.searchContainer}>
+      <View style={styles.searchContainer}>
         <TextInput
           style={styles.searchInput}
           placeholder="Buscar posts..."

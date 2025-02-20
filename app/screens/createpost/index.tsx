@@ -1,70 +1,31 @@
-import LoadingIndicator from "@/components/LoadingIndicator";
-import { useRoute, RouteProp, useNavigation } from "@react-navigation/native";
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 import {
   View,
+  ScrollView,
   Text,
   TextInput,
-  ScrollView,
-  StyleSheet,
   Button,
+  StyleSheet,
 } from "react-native";
+import { useNavigation } from "@react-navigation/native";
+import LoadingIndicator from "@/components/LoadingIndicator";
 
-type RootStackParamList = {
-  EditScreen: { postId: string };
-};
-
-type EditScreenRouteProp = RouteProp<RootStackParamList, "EditScreen">;
-
-export default function EditScreen() {
-  const route = useRoute<EditScreenRouteProp>();
-  const { postId } = route.params;
+export default function CreatePostScreen() {
   const navigation = useNavigation();
 
   const [title, setTitle] = useState("");
   const [author, setAuthor] = useState("");
   const [description, setDescription] = useState("");
-  const [createDate, setCreateDate] = useState("");
-  const [updateDate, setUpdateDate] = useState("");
-  const [loading, setLoading] = useState(true);
+  const [date, setDate] = useState("");
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    const fetchPost = async () => {
-      try {
-        const response = await fetch(
-          `https://fiap-blog-backend-latest.onrender.com/posts/${postId}`
-        );
+    const currentDate = getCurrentDate();
+    setDate(currentDate);
+  }, []);
 
-        const post = await response.json();
-
-        setTitle(post.title);
-        setAuthor(post.author);
-        setDescription(post.description);
-        setCreateDate(post.createDate);
-        setUpdateDate(post.updateDate);
-      } catch (error) {
-        console.error("Erro ao recuperar o post:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    if (postId) {
-      fetchPost();
-    }
-  }, [postId]);
-
-  const formatDate = (dateString: string) => {
-    const options: Intl.DateTimeFormatOptions = {
-      day: "2-digit",
-      month: "2-digit",
-      year: "numeric",
-    };
-    return new Date(dateString).toLocaleDateString("pt-BR", options);
-  };
-
-  const formatCurrentDate = (dateString: string) => {
-    const date = new Date(dateString);
+  const getCurrentDate = () => {
+    const date = new Date();
     const day = String(date.getDate()).padStart(2, "0");
     const month = String(date.getMonth() + 1).padStart(2, "0");
     const year = date.getFullYear();
@@ -75,39 +36,39 @@ export default function EditScreen() {
     navigation.goBack();
   };
 
-  const handleEdit = () => {
-    const currentDate = new Date().toISOString();
-    console.log("currentDate: ", currentDate);
-    const formattedDate = formatCurrentDate(currentDate);
-    console.log("formattedDate: ", formattedDate);
-    setUpdateDate(formattedDate);
-    console.log("updateDate onEdit: ", updateDate);
-    putPost(postId, formattedDate);
-  };
-
-  const putPost = async (postId: string, date: string) => {
+  const handleCreate = async () => {
     try {
       setLoading(true);
 
+      const createDate = date;
+      const updateDate = date;
+
       const response = await fetch(
-        `https://fiap-blog-backend-latest.onrender.com/posts/${postId}`,
+        "https://fiap-blog-backend-latest.onrender.com/posts",
         {
-          method: "PUT",
+          method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ title, description, updateDate: date }),
+          body: JSON.stringify({
+            title,
+            author,
+            description,
+            createDate,
+            updateDate,
+          }),
         }
       );
 
       if (!response.ok) {
-        throw new Error("Erro ao editar o post");
+        throw new Error(`Erro HTTP! Status: ${response.status}`);
       }
 
-      alert("Post editado com sucesso!");
+      alert("Post cadastrado com sucesso!");
     } catch (error) {
-      console.error("Erro ao editar o post:", error);
+      console.error("Erro ao cadastrar post:", error);
     } finally {
+      setLoading(false);
       navigation.goBack();
     }
   };
@@ -146,19 +107,11 @@ export default function EditScreen() {
         </View>
         <View style={styles.inputContainer}>
           <Text style={styles.label}>Create Date</Text>
-          <TextInput
-            style={styles.input}
-            value={formatDate(createDate)}
-            editable={false}
-          />
+          <TextInput style={styles.input} value={date} editable={false} />
         </View>
         <View style={styles.inputContainer}>
           <Text style={styles.label}>Update Date</Text>
-          <TextInput
-            style={styles.input}
-            value={formatDate(updateDate)}
-            editable={false}
-          />
+          <TextInput style={styles.input} value={date} editable={false} />
         </View>
       </ScrollView>
 
@@ -167,7 +120,7 @@ export default function EditScreen() {
           <Button title="Cancel" onPress={handleCancel} color="#6c757d" />
         </View>
         <View style={styles.buttonWrapper}>
-          <Button title="Edit" onPress={handleEdit} />
+          <Button title="Create" onPress={handleCreate} />
         </View>
       </View>
     </View>
