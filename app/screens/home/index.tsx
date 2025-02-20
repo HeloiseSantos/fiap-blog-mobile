@@ -6,6 +6,7 @@ import {
   FlatList,
   TextInput,
   TouchableOpacity,
+  Alert,
 } from "react-native";
 import { useAuth0 } from "react-native-auth0";
 import {
@@ -88,7 +89,47 @@ export default function Home() {
   };
 
   const handleDelete = (id: string) => {
-    // ToDo
+    Alert.alert(
+      "Confirmação",
+      "Você tem certeza que deseja excluir este post?",
+      [
+        {
+          text: "Cancelar",
+          style: "cancel",
+        },
+        {
+          text: "Excluir",
+          onPress: () => deletePost(id),
+          style: "destructive",
+        },
+      ],
+      { cancelable: true }
+    );
+  };
+
+  const deletePost = async (id: string) => {
+    try {
+      setLoading(true);
+
+      const response = await fetch(
+        `https://fiap-blog-backend-latest.onrender.com/posts/${id}`,
+        {
+          method: "DELETE",
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`Erro HTTP! Status: ${response.status}`);
+      }
+
+      alert("Post excluído com sucesso!");
+
+      fetchPosts();
+    } catch (error) {
+      console.error("Erro ao excluir post:", error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleSearch = async () => {
@@ -133,7 +174,7 @@ export default function Home() {
       <View style={styles.searchContainer}>
         <TextInput
           style={styles.searchInput}
-          placeholder="Buscar posts..."
+          placeholder="Search posts..."
           value={searchTerm}
           onChangeText={setSearchTerm}
         />
