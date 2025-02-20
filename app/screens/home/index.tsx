@@ -39,7 +39,7 @@ export default function Home() {
 
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
-  const [searchQuery, setSearchQuery] = useState("");
+  const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
     console.log("User state changed", user);
@@ -52,6 +52,10 @@ export default function Home() {
   useEffect(() => {
     fetchPosts();
   }, []);
+
+  useEffect(() => {
+    handleSearch();
+  }, [searchTerm]);
 
   useFocusEffect(
     useCallback(() => {
@@ -79,16 +83,31 @@ export default function Home() {
     }
   };
 
-  const onEdit = (id: string) => {
+  const handleEdit = (id: string) => {
     navigation.navigate("EditScreen", { postId: id });
   };
 
-  const onDelete = (id: string) => {
+  const handleDelete = (id: string) => {
     // ToDo
   };
 
-  const handleSearch = () => {
-    // ToDo
+  const handleSearch = async () => {
+    try {
+      const endpoint = searchTerm
+        ? `https://fiap-blog-backend-latest.onrender.com/posts/search?q=${searchTerm}`
+        : `https://fiap-blog-backend-latest.onrender.com/posts`;
+
+      const response = await fetch(endpoint);
+
+      if (!response.ok) {
+        throw new Error(`Erro HTTP! Status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      setPosts(data);
+    } catch (error) {
+      console.error("Erro ao buscar posts:", error);
+    }
   };
 
   const handleCreatePost = () => {
@@ -115,8 +134,8 @@ export default function Home() {
         <TextInput
           style={styles.searchInput}
           placeholder="Buscar posts..."
-          value={searchQuery}
-          onChangeText={handleSearch}
+          value={searchTerm}
+          onChangeText={setSearchTerm}
         />
         <TouchableOpacity
           style={styles.createButton}
@@ -134,8 +153,8 @@ export default function Home() {
             author={item.author}
             title={item.title}
             description={item.description}
-            onEdit={onEdit}
-            onDelete={onDelete}
+            onEdit={handleEdit}
+            onDelete={handleDelete}
           />
         )}
         keyExtractor={(item) => item._id}
